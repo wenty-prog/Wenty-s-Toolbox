@@ -24,3 +24,360 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ===== 首頁：天空背景 ===== */
+
+/* 雲從畫面左外側慢慢飄到右外側 */
+.sky-cloud {
+  position: absolute;
+  left: 0;
+  animation: cloud-drift linear infinite;
+}
+
+@keyframes cloud-drift {
+  from {
+    transform: translateX(-40vw);
+  }
+  to {
+    transform: translateX(110vw);
+  }
+}
+
+/* 微風：一道白色細線滑過後淡出 */
+.sky-breeze {
+  position: absolute;
+  left: 0;
+  opacity: 0;
+  animation: breeze ease-in-out infinite;
+}
+
+@keyframes breeze {
+  0% {
+    transform: translateX(-40vw);
+    opacity: 0;
+  }
+  25%,
+  70% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateX(110vw);
+    opacity: 0;
+  }
+}
+
+/* 鳥群：橫越天空，同時上下輕輕起伏，翅膀拍動 */
+.sky-flock {
+  position: absolute;
+  left: 0;
+  animation: flock-fly linear infinite;
+}
+
+@keyframes flock-fly {
+  from {
+    transform: translateX(-15vw);
+  }
+  to {
+    transform: translateX(115vw);
+  }
+}
+
+.sky-bob {
+  position: relative;
+  animation: bob 4s ease-in-out infinite alternate;
+}
+
+@keyframes bob {
+  from {
+    transform: translateY(-10px);
+  }
+  to {
+    transform: translateY(12px);
+  }
+}
+
+.sky-wing {
+  transform-origin: 50% 70%;
+  animation: flap 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes flap {
+  from {
+    transform: scaleY(1);
+  }
+  to {
+    transform: scaleY(0.35);
+  }
+}
+
+/* 減少動態效果時停在當下畫面（負的 delay 讓雲和鳥仍散布在天空中） */
+@media (prefers-reduced-motion: reduce) {
+  .sky-cloud,
+  .sky-breeze,
+  .sky-flock,
+  .sky-bob,
+  .sky-wing {
+    animation-play-state: paused;
+  }
+}
+
+/* ===== 抽獎頁：粉彩晨光天空 ===== */
+
+/* 熱氣球從畫面下方慢慢升到上方 */
+.balloon-rise {
+  position: absolute;
+  bottom: -140px;
+  animation: balloon-rise linear infinite;
+}
+
+@keyframes balloon-rise {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(calc(-100vh - 280px));
+  }
+}
+
+/* 上升時左右輕輕搖擺 */
+.balloon-sway {
+  animation: balloon-sway 6s ease-in-out infinite alternate;
+}
+
+@keyframes balloon-sway {
+  from {
+    transform: translateX(-14px) rotate(-3deg);
+  }
+  to {
+    transform: translateX(14px) rotate(3deg);
+  }
+}
+
+/* 小星光一閃一閃 */
+.twinkle {
+  position: absolute;
+  animation: twinkle 3.2s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: scale(0.6);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+}
+
+/* 底部雲海前後兩層，反方向緩慢漂動 */
+.cloud-sea {
+  animation: cloud-sea 14s ease-in-out infinite alternate;
+}
+
+.cloud-sea-front {
+  animation-duration: 10s;
+  animation-direction: alternate-reverse;
+}
+
+@keyframes cloud-sea {
+  from {
+    transform: translateX(-2.5%);
+  }
+  to {
+    transform: translateX(2.5%);
+  }
+}
+
+/* 轉盤外圈雲朵間的星光，兩組交錯柔和閃爍；抽獎中閃得更快 */
+.wheel-light {
+  fill: #ffd1de;
+  animation: wheel-light 1.6s ease-in-out infinite;
+}
+
+.wheel-light-alt {
+  animation-delay: 0.8s;
+}
+
+.spinning .wheel-light {
+  animation-duration: 0.4s;
+}
+
+.spinning .wheel-light-alt {
+  animation-delay: 0.2s;
+}
+
+@keyframes wheel-light {
+  0%,
+  100% {
+    fill: #ffd1de;
+  }
+  50% {
+    fill: #ffd98a;
+  }
+}
+
+/* 轉盤中央太陽的光芒，緩慢自轉；抽獎中轉快一點 */
+.sun-rays {
+  animation: sun-rays 24s linear infinite;
+}
+
+.spinning .sun-rays {
+  animation-duration: 6s;
+}
+
+@keyframes sun-rays {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .balloon-rise,
+  .balloon-sway,
+  .twinkle,
+  .cloud-sea {
+    animation-play-state: paused;
+  }
+
+  .wheel-light,
+  .sun-rays {
+    animation: none;
+  }
+}
+
+/* ===== 蕃茄鐘：湖綠色天空 ===== */
+
+/* 暖陽慢慢放大縮小，像深呼吸的節奏 */
+.calm-breathe {
+  animation: calm-breathe 8s ease-in-out infinite;
+}
+
+@keyframes calm-breathe {
+  0%,
+  100% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+}
+
+/* 薄雲左右來回飄動，ease-in-out 讓轉向時放慢，看起來柔和 */
+.calm-drift {
+  animation: calm-drift ease-in-out infinite alternate;
+}
+
+@keyframes calm-drift {
+  from {
+    transform: translateX(-12vw);
+  }
+  to {
+    transform: translateX(12vw);
+  }
+}
+
+/* ===== 好運抽籤：夜空 ===== */
+
+/* 流星：快速劃過約 1～2 秒後消失，其餘時間隱藏，等下一輪再出現 */
+.meteor {
+  opacity: 0;
+  animation: meteor linear infinite;
+}
+
+@keyframes meteor {
+  0% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+  2% {
+    opacity: 1;
+  }
+  12% {
+    opacity: 0.9;
+  }
+  17%,
+  100% {
+    opacity: 0;
+    transform: translateX(45vw);
+  }
+}
+
+/* 搖籤筒：左傾、上提、右傾、上提，像雙手捧著籤筒用力搖 */
+.fortune-shake {
+  transform-origin: 50% 90%;
+  animation: fortune-shake 0.5s ease-in-out infinite;
+}
+
+@keyframes fortune-shake {
+  0%,
+  100% {
+    transform: translate(-6px, 0) rotate(-12deg);
+  }
+  25% {
+    transform: translate(0, -12px) rotate(0deg);
+  }
+  50% {
+    transform: translate(6px, 0) rotate(12deg);
+  }
+  75% {
+    transform: translate(0, -12px) rotate(0deg);
+  }
+}
+
+/* 搖籤時筒裡的籤上下跳動、互相碰撞 */
+.fortune-shake .fortune-rattle {
+  animation: fortune-rattle 0.18s ease-in-out infinite alternate;
+}
+
+@keyframes fortune-rattle {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-9px);
+  }
+}
+
+/* 抽出的籤從筒裡往上跳出來 */
+.fortune-stick {
+  transition: transform 0.5s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+.fortune-stick-out {
+  transform: translateY(-34px);
+}
+
+/* 結果卡片淡入上浮 */
+.fortune-reveal {
+  animation: fortune-reveal 0.5s ease-out;
+}
+
+@keyframes fortune-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .calm-breathe,
+  .calm-drift,
+  .meteor,
+  .fortune-shake,
+  .fortune-shake .fortune-rattle,
+  .fortune-reveal {
+    animation: none;
+  }
+
+  .fortune-stick {
+    transition: none;
+  }
+}
