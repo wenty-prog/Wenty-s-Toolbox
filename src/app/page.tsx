@@ -10,7 +10,7 @@ const tools = [
     tag: "LUCKY WHEEL",
     tagline: "公平又有趣的隨機抽獎",
     desc: "貼上名單、按下開始，轉盤在雲朵間轉動，替你抽出今天的幸運兒。活動抽獎、決定誰請飲料都適合。",
-    features: ["一行一個名字，貼上就能抽", "可設定抽中後移除，不重複中獎", "自動保留中獎紀錄"],
+    features: ["一行一個項目，貼上就能抽", "可設定抽中後移除，不重複中獎", "自動保留中獎紀錄"],
     accent: "#7c83e0",
     panel: "bg-[linear-gradient(160deg,#c3d0ff_0%,#e4dcff_45%,#fbe0ec_100%)]",
     preview: WheelPreview,

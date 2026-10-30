@@ -89,6 +89,8 @@ export default function LotteryWheel() {
   const [removeWinner, setRemoveWinner] = useState(false);
   const [menu, setMenu] = useState<BurgerMenu | null>(null);
   const [menuError, setMenuError] = useState(false);
+  // 這一輪第一次轉動前的名單，給「重置」還原用；手動改名單後清空，下次轉動時重新記下
+  const [roundText, setRoundText] = useState<string | null>(null);
   const timerRef = useRef<number>(undefined);
 
   useEffect(() => () => window.clearTimeout(timerRef.current), []);
@@ -108,15 +110,27 @@ export default function LotteryWheel() {
     };
   }, []);
 
-  function applyMenu() {
-    if (!menu) return;
-    setText(menu.items.map((b) => b.name).join("\n"));
+  // 換一份新名單，視為新的一輪
+  function replaceList(next: string) {
+    setText(next);
     setWinnerIndex(null);
+    setRoundText(null);
+  }
+
+  function applyMenu() {
+    if (menu) replaceList(menu.items.map((b) => b.name).join("\n"));
   }
 
   // 還原成剛進入頁面時的範例名單
   function resetList() {
-    setText(SAMPLE);
+    replaceList(SAMPLE);
+  }
+
+  // 名單還原成這一輪開始轉動前的樣子（找回被「抽中後移除」拿掉的項目），並清空中獎紀錄
+  function resetRound() {
+    if (roundText !== null) setText(roundText);
+    setRoundText(null);
+    setHistory([]);
     setWinnerIndex(null);
   }
 
@@ -129,6 +143,7 @@ export default function LotteryWheel() {
 
   function spin() {
     if (spinning) return;
+    if (roundText === null) setRoundText(text);
 
     // 勾選「抽中後移除」時，先把上一位得獎者從名單拿掉再抽
     let list = names;
@@ -185,6 +200,14 @@ export default function LotteryWheel() {
           </button>
           <button type="button" onClick={resetList} disabled={spinning} className={LIST_BUTTON}>
             ↺ 預設
+          </button>
+          <button
+            type="button"
+            onClick={resetRound}
+            disabled={spinning || (roundText === null && history.length === 0)}
+            className={LIST_BUTTON}
+          >
+            🧹 重置
           </button>
         </div>
 
@@ -321,7 +344,7 @@ export default function LotteryWheel() {
               </>
             ) : (
               <p className="font-medium text-slate-500">
-                {spinning ? "轉盤轉動中……" : names.length < 2 ? "請至少輸入 2 個名字" : "準備好了嗎？"}
+                {spinning ? "轉盤轉動中……" : names.length < 2 ? "請至少輸入 2 個項目" : "準備好了嗎？"}
               </p>
             )}
           </div>
@@ -344,16 +367,13 @@ export default function LotteryWheel() {
           <textarea
             id="names"
             value={text}
-            onChange={(e) => {
-              setText(e.target.value);
-              setWinnerIndex(null); // 名單變了，原本的得獎位置就不準了
-            }}
+            onChange={(e) => replaceList(e.target.value)}
             disabled={spinning}
             rows={10}
-            placeholder={"一行輸入一個名字，例如：\n王小明\n李小華"}
+            placeholder={"一行輸入一個項目，例如：\n王小明\n大麥克"}
             className="mt-4 min-h-48 w-full resize-y rounded-2xl border border-[#c3c9f2] bg-[#f4f4fd] px-4 py-3 leading-7 focus:outline-none focus:ring-4 focus:ring-indigo-200 disabled:opacity-60"
           />
-          <p className="mt-2 text-xs text-slate-500">一行一個名字，空白行會自動忽略。</p>
+          <p className="mt-2 text-xs text-slate-500">一行一個項目，空白行會自動忽略。</p>
 
           <label className="mt-4 flex items-center gap-2 text-sm text-slate-600">
             <input
