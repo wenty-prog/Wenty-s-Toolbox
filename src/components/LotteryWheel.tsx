@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { BurgerMenu } from "@/lib/mcdonalds";
 
 const SPIN_MS = 5000;
 const R = 95;
@@ -54,8 +55,11 @@ const point = (deg: number) => {
   return `${(Math.sin(rad) * R).toFixed(3)} ${(-Math.cos(rad) * R).toFixed(3)}`;
 };
 
-// 名字太長時截斷，避免超出扇形
-const shorten = (name: string) => (name.length > 6 ? `${name.slice(0, 6)}…` : name);
+// 名字太長時截斷，避免超出扇形；名單多時字變小，可以多放幾個字
+const shorten = (name: string, count: number) => {
+  const max = count > 16 ? 9 : 6;
+  return name.length > max ? `${name.slice(0, max)}…` : name;
+};
 
 // 名單越多字越小，太多時就不顯示文字
 const labelSize = (count: number) => (count <= 8 ? 9 : count <= 16 ? 6.5 : count <= 30 ? 4.5 : 0);
@@ -71,6 +75,10 @@ const randomOffset = () => Math.random() - 0.5;
 const CARD =
   "rounded-3xl border-2 border-[#c3c9f2] bg-[#e9ebfb]/80 p-5 shadow-[0_16px_40px_-20px_rgb(90_100_170/0.45)] backdrop-blur-md";
 
+// 轉盤上方套用名單的按鈕
+const LIST_BUTTON =
+  "rounded-full border-2 border-[#c3c9f2] bg-[#e9ebfb]/80 px-5 py-2 font-bold text-slate-700 shadow-[0_8px_20px_-12px_rgb(90_100_170/0.5)] backdrop-blur-md transition hover:-translate-y-0.5 hover:bg-[#e2e5fa] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0";
+
 export default function LotteryWheel() {
   const [text, setText] = useState(SAMPLE);
   const [rotation, setRotation] = useState(0);
@@ -79,9 +87,38 @@ export default function LotteryWheel() {
   const [winnerIndex, setWinnerIndex] = useState<number | null>(null);
   const [history, setHistory] = useState<string[]>([]);
   const [removeWinner, setRemoveWinner] = useState(false);
+  const [menu, setMenu] = useState<BurgerMenu | null>(null);
+  const [menuError, setMenuError] = useState(false);
   const timerRef = useRef<number>(undefined);
 
   useEffect(() => () => window.clearTimeout(timerRef.current), []);
+
+  // 每次進入頁面都抓一次最新的麥當勞漢堡清單
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/mcdonalds-burgers", { cache: "no-store" })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json() as Promise<BurgerMenu>;
+      })
+      .then((data) => alive && setMenu(data))
+      .catch(() => alive && setMenuError(true));
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  function applyMenu() {
+    if (!menu) return;
+    setText(menu.items.map((b) => b.name).join("\n"));
+    setWinnerIndex(null);
+  }
+
+  // 還原成剛進入頁面時的範例名單
+  function resetList() {
+    setText(SAMPLE);
+    setWinnerIndex(null);
+  }
 
   const names = text
     .split("\n")
@@ -128,6 +165,29 @@ export default function LotteryWheel() {
     <div className="grid w-full items-start gap-10 lg:grid-cols-[1fr_minmax(0,22rem)]">
       {/* 轉盤：漂浮在天空中的雲朵轉盤 */}
       <section className="flex flex-col items-center">
+        {/* 快速套用名單 */}
+        <div className="mb-2 flex w-full flex-wrap items-center gap-x-3 gap-y-1">
+          {/* 清單狀態只放在滑鼠停留時的提示，不佔畫面 */}
+          <button
+            type="button"
+            onClick={applyMenu}
+            disabled={spinning || !menu}
+            className={LIST_BUTTON}
+            title={
+              menu
+                ? `${menu.items.length} 款漢堡・${menu.source === "live" ? "已抓取最新菜單" : "暫時抓不到最新菜單，使用內建清單"}`
+                : menuError
+                  ? "清單讀取失敗，請重新整理頁面"
+                  : "正在抓取最新菜單…"
+            }
+          >
+            🍔 麥當勞清單
+          </button>
+          <button type="button" onClick={resetList} disabled={spinning} className={LIST_BUTTON}>
+            ↺ 預設
+          </button>
+        </div>
+
         <div className="flex w-full max-w-[34rem] flex-col items-center px-1 py-2 sm:px-4">
           <div className={`relative aspect-square w-full max-w-[28rem] ${spinning ? "spinning" : ""}`}>
             {/* 雲朵外圈與星光（不旋轉） */}
@@ -198,7 +258,7 @@ export default function LotteryWheel() {
                           textAnchor={flip ? "start" : "end"}
                           dominantBaseline="central"
                         >
-                          {shorten(name)}
+                          {shorten(name, names.length)}
                         </text>
                       );
                     })}
@@ -278,7 +338,7 @@ export default function LotteryWheel() {
               抽獎名單
             </label>
             <span className="rounded-full bg-indigo-100 px-3 py-1 text-sm font-medium text-indigo-500">
-              共 {names.length} 人
+              共 {names.length} 個項目
             </span>
           </div>
           <textarea
